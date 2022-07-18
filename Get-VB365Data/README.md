@@ -1,4 +1,4 @@
-# Gather VB365 calculator Data - beta
+# Gather VB365 calculator data - beta
 
 ***NOTE: The reason project is in beta is because further testing is needed on the results of the json file. It is recommended to double check the results manually using the downloaded CSV files.
 If you find any discrepancies, please raise an issue.***
