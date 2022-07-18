@@ -121,7 +121,7 @@ Log in when prompted, once complete it will display the results that can be inpu
 Change-Rate
 - The first and last capacity values are taken from the storage reports
 - The difference in values is calculated
-- The difference is divided by the most recent storage value
+- The difference is divided by the oldest storage value
 - The value is converted to a percentage, divided by the report's scoped days, the multiplied by 7
 
 Capacity 
