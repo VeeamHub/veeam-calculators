@@ -108,6 +108,7 @@ class RetentionSize {
     }
 }
 
+
 class TableItem {
     [string]$name
     [float]$totalSize
@@ -256,10 +257,7 @@ $newestOnedriveTb = $newestOnedrive / [Math]::Pow(1024, 4)
 $newestOnedriveTb = Test-Size $newestOnedriveTb
 
 # create the retention size object
-$retentionSize = [RetentionSize]::new(
-    5, 
-    "Years"
-)
+$retentionSize = New-Object -TypeName RetentionSize -ArgumentList 5,"Years"
 
 # create the main object
 $primaryMailbox = [TableItem]::new(
