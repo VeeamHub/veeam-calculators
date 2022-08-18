@@ -27,6 +27,7 @@
     Author:         Ed Howard (edward.x.howard@veeam.com)
     Creation Date:  06.06.2022
     Purpose/Change: 06.06.2022 - 1.0 - Initial script development
+                    18.08.2022 - 1.1 - Adding a local mode to work with manually exported CSVs
 #>
 
 [CmdletBinding()]
@@ -74,8 +75,6 @@ if ($local -eq $false) {
 
     # GetSharePointSitesDetail
     Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/reports/getSharePointSiteUsageDetail(period='D$Days')" -OutputFilePath sharepoint_sites_detail.csv
-
-    Disconnect-MgGraph
 }
 
 function Get-Change {

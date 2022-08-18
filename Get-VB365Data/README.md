@@ -67,15 +67,15 @@ https://docs.microsoft.com/en-us/powershell/microsoftgraph/get-started?view=grap
 
 The following information is gathered from the Graph API.
 
-| Item | Link |
-| ---- | ---- |
-| Mailbox Usage Detail | https://docs.microsoft.com/en-us/powershell/module/microsoft.graph.reports/get-mgreportmailboxusagedetail?view=graph-powershell-1.0 |
-| Active User Detail | https://docs.microsoft.com/en-us/graph/api/reportroot-getoffice365activeuserdetail?view=graph-rest-1.0 | 
-| Active User Counts | https://docs.microsoft.com/en-us/graph/api/reportroot-getoffice365activeusercounts?view=graph-rest-1.0 |
-| Mailbox Usage Storage | https://docs.microsoft.com/en-us/graph/api/reportroot-getmailboxusagestorage?view=graph-rest-1.0  |
-| OneDrive Usage Storage | https://docs.microsoft.com/en-us/graph/api/reportroot-getonedriveusagestorage?view=graph-rest-1.0 | 
-| SharePoint Site Usage Storage | https://docs.microsoft.com/en-us/graph/api/reportroot-getsharepointsiteusagestorage?view=graph-rest-1.0 |
-| SharePoint Site Detail | https://docs.microsoft.com/en-us/graph/api/reportroot-getsharepointsiteusagedetail?view=graph-rest-1.0 |
+| Item                          | Link                                                                                                                                |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Mailbox Usage Detail          | https://docs.microsoft.com/en-us/powershell/module/microsoft.graph.reports/get-mgreportmailboxusagedetail?view=graph-powershell-1.0 |
+| Active User Detail            | https://docs.microsoft.com/en-us/graph/api/reportroot-getoffice365activeuserdetail?view=graph-rest-1.0                              |
+| Active User Counts            | https://docs.microsoft.com/en-us/graph/api/reportroot-getoffice365activeusercounts?view=graph-rest-1.0                              |
+| Mailbox Usage Storage         | https://docs.microsoft.com/en-us/graph/api/reportroot-getmailboxusagestorage?view=graph-rest-1.0                                    |
+| OneDrive Usage Storage        | https://docs.microsoft.com/en-us/graph/api/reportroot-getonedriveusagestorage?view=graph-rest-1.0                                   |
+| SharePoint Site Usage Storage | https://docs.microsoft.com/en-us/graph/api/reportroot-getsharepointsiteusagestorage?view=graph-rest-1.0                             |
+| SharePoint Site Detail        | https://docs.microsoft.com/en-us/graph/api/reportroot-getsharepointsiteusagedetail?view=graph-rest-1.0                              |
 
 
 ### User Data 
@@ -107,6 +107,24 @@ To sign out of Graph you can manually enter the following after you have finishe
 ### Removing PowerShell SDK Access
 
 Please check your Azure AD account and delete the PowerShell Enterprise Application named "Microsoft Graph PowerShell" if you do not wish to retain access.     
+
+### Local Mode
+
+You can use the `local` switch on the script to not connect to Microsoft Graph but use only the CSV reports from the current folder.
+These CSVs can come from manual report exports or from previous runs.
+
+Place the CSV exports from the corresponding reports (see above) to the folder and name them accordingly:
+
+    active_user_counts.csv 
+    active_user_detail.csv
+    sharepoint_site_counts.csv
+    mailbox_useage_storage.csv
+    sharepoint_site_storage.csv
+    onedrive_usage_storage.csv
+
+Then run the script to calculate the JSON output:
+
+    .\GetM365Data.ps1 -Local
 
 ## How to use Exchange Online Management Script
 
