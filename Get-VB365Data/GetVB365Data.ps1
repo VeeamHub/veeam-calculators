@@ -23,9 +23,8 @@
     .OUTPUTS
         vb365-environment-info.json
     .Notes 
-    Version:        1.0
+    Version:        1.1
     Author:         Ed Howard (edward.x.howard@veeam.com)
-    Creation Date:  06.06.2022
     Purpose/Change: 06.06.2022 - 1.0 - Initial script development
                     18.08.2022 - 1.1 - Adding a local mode to work with manually exported CSVs
 #>

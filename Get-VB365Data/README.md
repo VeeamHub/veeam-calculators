@@ -86,11 +86,11 @@ active_user_detail.csv is downloaded with usernames and email addresses; however
 
 Run the script the following command in PowerShell:
 
-    ./GetM365Data.ps1
+    ./GetVB365Data.ps1
 
 The script defaults to analyzing the last 30 days. To modify this you can modify this with the -Days flag with either 7, 30, 90, and 180 days. 
 
-    ./GetM365Data.ps1 -Days 90
+    ./GetVB365Data.ps1 -Days 90
 
 You will be prompted to log into your MS account which will require Admin privileges. Doing this will create a new PowerShell related Enterprise Application in your Azure AD. 
 
@@ -124,7 +124,7 @@ Place the CSV exports from the corresponding reports (see above) to the folder a
 
 Then run the script to calculate the JSON output:
 
-    .\GetM365Data.ps1 -Local
+    .\GetVB365Data.ps1 -Local
 
 ## How to use Exchange Online Management Script
 
