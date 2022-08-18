@@ -10,6 +10,8 @@
     .PARAMETER Days
         Changes the quantity of days the analysis is based on.
         Choices are 7, 30, 90, and 180.
+    .PARAMETER Local
+        Uses the locally available CSV files to create the output JSON instead of querying the Microsoft Graph API for the reports.
     .EXAMPLE
         ./GetVB365Data.ps1
     .EXAMPLE
@@ -30,7 +32,10 @@
 [CmdletBinding()]
 Param(
     [Parameter(Mandatory=$False)]
-    [string]$Days=30
+    [string]$Days=30,
+
+    [Parameter(Mandatory=$False)]
+    [Switch]$Local
 )
 
 $options = @(7,30,90,180)
@@ -40,34 +45,38 @@ if ($Days -notin $options) {
     return
 }
 
-Connect-MgGraph -Scopes "user.read.all", "reports.read.all"
+if ($local -eq $false) {
+    Connect-MgGraph -Scopes "user.read.all", "reports.read.all"
 
-# GetOffice365ActiveUserDetail
-Invoke-MgGraphRequest -Uri  "https://graph.microsoft.com/v1.0/reports/getOffice365ActiveUserDetail(period='D$Days')" -OutputFilePath active_user_detail.csv
+    # GetOffice365ActiveUserDetail
+    Invoke-MgGraphRequest -Uri  "https://graph.microsoft.com/v1.0/reports/getOffice365ActiveUserDetail(period='D$Days')" -OutputFilePath active_user_detail.csv
 
-# GetOffice365ActiveUserCounts
-Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/reports/getOffice365ActiveUserCounts(period='D$Days')" -OutputFilePath active_user_counts.csv
+    # GetOffice365ActiveUserCounts
+    Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/reports/getOffice365ActiveUserCounts(period='D$Days')" -OutputFilePath active_user_counts.csv
 
-# GetOffice365GroupsActivityGroupCounts
-Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/reports/getOffice365GroupsActivityGroupCounts(period='D$Days')" -OutputFilePath group_activity_counts.csv
+    # GetOffice365GroupsActivityGroupCounts
+    Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/reports/getOffice365GroupsActivityGroupCounts(period='D$Days')" -OutputFilePath group_activity_counts.csv
 
-# GetMailboxUsageDetail
-Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/reports/getMailboxUsageDetail(period='D$Days')" -OutputFilePath mailbox_usage_detail.csv
+    # GetMailboxUsageDetail
+    Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/reports/getMailboxUsageDetail(period='D$Days')" -OutputFilePath mailbox_usage_detail.csv
 
-# GetMailboxUsageStorage
-Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/reports/getMailboxUsageStorage(period='D$Days')" -OutputFilePath mailbox_useage_storage.csv
+    # GetMailboxUsageStorage
+    Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/reports/getMailboxUsageStorage(period='D$Days')" -OutputFilePath mailbox_useage_storage.csv
 
-# GetOneDriveUsageStorage
-Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/reports/getOneDriveUsageStorage(period='D$Days')" -OutputFilePath onedrive_usage_storage.csv
+    # GetOneDriveUsageStorage
+    Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/reports/getOneDriveUsageStorage(period='D$Days')" -OutputFilePath onedrive_usage_storage.csv
 
-# GetSharePointSiteUsageStorage
-Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/reports/getSharePointSiteUsageStorage(period='D$Days')" -OutputFilePath sharepoint_site_storage.csv
+    # GetSharePointSiteUsageStorage
+    Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/reports/getSharePointSiteUsageStorage(period='D$Days')" -OutputFilePath sharepoint_site_storage.csv
 
-# GetSharePointSiteUseageSiteCountds
-Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/reports/getSharePointSiteUsageSiteCounts(period='D$Days')" -OutputFilePath sharepoint_site_counts.csv
+    # GetSharePointSiteUseageSiteCountds
+    Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/reports/getSharePointSiteUsageSiteCounts(period='D$Days')" -OutputFilePath sharepoint_site_counts.csv
 
-# GetSharePointSitesDetail
-Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/reports/getSharePointSiteUsageDetail(period='D$Days')" -OutputFilePath sharepoint_sites_detail.csv
+    # GetSharePointSitesDetail
+    Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/reports/getSharePointSiteUsageDetail(period='D$Days')" -OutputFilePath sharepoint_sites_detail.csv
+
+    Disconnect-MgGraph
+}
 
 function Get-Change {
     param (
