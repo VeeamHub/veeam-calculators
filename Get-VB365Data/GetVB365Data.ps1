@@ -49,31 +49,31 @@ if ($Local -eq $False) {
     Connect-MgGraph -Scopes "user.read.all", "reports.read.all"
 
     # GetOffice365ActiveUserDetail
-    Invoke-MgGraphRequest -Uri  "https://graph.microsoft.com/v1.0/reports/getOffice365ActiveUserDetail(period='D$Days')" -OutputFilePath active_user_detail.csv
-    
+    Get-MgReportOffice365ActiveUserDetail -Period D$Days -OutFile active_user_detail.csv
+
     # GetOffice365ActiveUserCounts
-    Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/reports/getOffice365ActiveUserCounts(period='D$Days')" -OutputFilePath active_user_counts.csv
-    
+    Get-MgReportOffice365ActiveUserCount -Period D$Days -OutFile active_user_counts.csv
+
     # GetOffice365GroupsActivityGroupCounts
-    Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/reports/getOffice365GroupsActivityGroupCounts(period='D$Days')" -OutputFilePath group_activity_counts.csv
-    
+    Get-MgReportOffice365GroupActivityCount -Period D$Days -OutFile group_activity_counts.csv
+
     # GetMailboxUsageDetail
-    Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/reports/getMailboxUsageDetail(period='D$Days')" -OutputFilePath mailbox_usage_detail.csv 
+    Get-MgReportMailboxUsageDetail -Period D$Days -OutFile mailbox_usage_detail.csv 
     
     # GetMailboxUsageStorage
-    Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/reports/getMailboxUsageStorage(period='D$Days')" -OutputFilePath mailbox_usage_storage.csv
-    
+    Get-MgReportMailboxUsageStorage -Period D$Days -OutFile mailbox_usage_storage.csv
+
     # GetOneDriveUsageStorage
-    Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/reports/getOneDriveUsageStorage(period='D$Days')" -OutputFilePath onedrive_usage_storage.csv
-    
+    Get-MgReportOneDriveUsageStorage -Period D$Days -OutFile onedrive_usage_storage.csv
+
     # GetSharePointSiteUsageStorage
-    Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/reports/getSharePointSiteUsageStorage(period='D$Days')" -OutputFilePath sharepoint_site_storage.csv
-    
-    # GetSharePointSiteUseageSiteCountds
-    Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/reports/getSharePointSiteUsageSiteCounts(period='D$Days')" -OutputFilePath sharepoint_site_counts.csv
-    
+    Get-MgReportSharePointSiteUsageStorage -Period D$Days -OutFile sharepoint_site_storage.csv
+
+    # GetSharePointSiteUseageSiteCounts
+    Get-MgReportSharePointSiteUsageSiteCount -Period D$Days -OutFile sharepoint_site_counts.csv
+
     # GetSharePointSitesDetail
-    Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/reports/getSharePointSiteUsageDetail(period='D$Days')" -OutputFilePath sharepoint_sites_detail.csv
+    Get-MgReportSharePointSiteUsageDetail -Period D$Days -OutFile sharepoint_sites_detail.csv
     
 }
 else {
@@ -99,8 +99,8 @@ function Test-Size {
         [float]$Cap  
     )
 
-    if ($Cap -le 0) {
-        return 1
+    if ($Cap -le 0.01) {
+        return 0.01
     }
     else {
         return $Cap
