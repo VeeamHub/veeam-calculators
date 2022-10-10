@@ -120,6 +120,22 @@ class RetentionSize {
     }
 }
 
+function Get-Value {
+    param(
+        [array]$data,
+        [bool]$old
+    )
+
+    if ($old) {
+        [decimal]$oldestStorage = ($data | Select-Object -Last 1).'Storage Used (Byte)'
+        return $oldestStorage
+    }
+    else {
+        [decimal]$newestStorage = ($data | Select-Object -First 1).'Storage Used (Byte)'
+        return $newestStorage
+    }
+}
+
 class TableItem {
     [string]$name
     [float]$totalSize
@@ -242,9 +258,7 @@ $exchangeAll = ($userDetail | Where-Object { $_.'Has Exchange License' -eq 'True
 $onedriveAll = ($userDetail | Where-Object { $_.'Has OneDrive License' -eq 'True' } ).count
 $teamsAll = ($userDetail | Where-Object { $_.'Has Teams License' -eq 'True' } ).count
 
-$sharepointSites = ($sharePointSites | Where-Object { $_.'Site Type' -like 'ALL' } | ForEach-Object { [int]$_.Total }  | Measure-Object -Maximum).Maximum
-
-
+$sharepointSites = ($sharePointSites | Where-Object { $_.'Site Type' -like 'All' } | Select-Object -First 1).Total 
 
 try {
     # get capacity info for each
@@ -265,22 +279,22 @@ $sharepointStorage = $sharepointStorage | Where-Object { $_.'Storage Used (Byte)
 $onedriveStorage = $onedriveStorage | Where-Object { $_.'Storage Used (Byte)' -gt 0 }
 
 # exchange
-[decimal]$oldestMailbox = $mailboxStorage | Select-Object -Last 1 | ForEach-Object { $_.'Storage Used (Byte)' }
-[decimal]$newestMailbox = $mailboxStorage | Select-Object -First 1 | ForEach-Object { $_.'Storage Used (Byte)' }
+[decimal]$oldestMailbox = Get-Value -data $mailboxStorage -old $true
+[decimal]$newestMailbox = Get-Value -data $mailboxStorage -old $false
 $mailBoxChange = Get-Change -Oldest $oldestMailbox -Newest $newestMailbox -Days $Days
 $newestMailboxTb = $newestMailbox / [Math]::Pow(1024, 4)
 $newestMailboxTb = Test-Size $newestMailboxTb
 
 #sharepoint
-[decimal]$oldestSharepoint = $sharepointStorage | Select-Object -Last 1 | ForEach-Object { $_.'Storage Used (Byte)' }
-[decimal]$newestSharepoint = $sharepointStorage | Select-Object -First 1 | ForEach-Object { $_.'Storage Used (Byte)' }
+[decimal]$oldestSharepoint = Get-Value -data $sharepointStorage -old $true
+[decimal]$newestSharepoint = Get-Value -data $sharepointStorage -old $false
 $sharepointChange = Get-Change -Oldest $oldestSharepoint -Newest $newestSharepoint -Days $Days
 $newestSharepointTb = $oldestSharepoint / [Math]::Pow(1024, 4)
 $newestSharepointTb = Test-Size $newestSharepointTb
 
 #onedrive
-[decimal]$oldestOnedrive = $onedriveStorage | Select-Object -Last 1 | ForEach-Object { $_.'Storage Used (Byte)' }
-[decimal]$newestOnedrive = $onedriveStorage | Select-Object -First 1 | ForEach-Object { $_.'Storage Used (Byte)' }
+[decimal]$oldestOnedrive = Get-Value -data $onedriveStorage -old $true
+[decimal]$newestOnedrive = Get-Value -data $onedriveStorage -old $false
 $onedriveChange = Get-Change -Oldest $oldestOnedrive -Newest $newestOnedrive -Days $Days
 $newestOnedriveTb = $newestOnedrive / [Math]::Pow(1024, 4)
 $newestOnedriveTb = Test-Size $newestOnedriveTb
