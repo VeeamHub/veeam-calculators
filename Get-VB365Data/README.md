@@ -1,6 +1,6 @@
 # Gather VB365 calculator Data
 
-**_NOTE: The reason project is in beta is because further testing is needed on the results of the json file. It is recommended to double check the results manually using the downloaded CSV files.
+**_NOTE: It is recommended to double check the results manually using the downloaded CSV files.
 If you find any discrepancies, please raise an issue._**
 
 This repository provides information on how to gather VB365 data for the use with the Veeam Backup for Microsoft 365 calculator. The script is provided under MIT, please review license before proceeding.
