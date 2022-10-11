@@ -289,7 +289,7 @@ $newestMailboxTb = Test-Size $newestMailboxTb
 [decimal]$oldestSharepoint = Get-Value -data $sharepointStorage -old $true
 [decimal]$newestSharepoint = Get-Value -data $sharepointStorage -old $false
 $sharepointChange = Get-Change -Oldest $oldestSharepoint -Newest $newestSharepoint -Days $Days
-$newestSharepointTb = $oldestSharepoint / [Math]::Pow(1024, 4)
+$newestSharepointTb = $newestSharepoint / [Math]::Pow(1024, 4)
 $newestSharepointTb = Test-Size $newestSharepointTb
 
 #onedrive
