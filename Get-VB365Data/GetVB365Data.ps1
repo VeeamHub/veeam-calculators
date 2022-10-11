@@ -10,6 +10,8 @@
     .PARAMETER Days
         Changes the quantity of days the analysis is based on.
         Choices are 7, 30, 90, and 180.
+    .PARAMETER Local
+        To be used if the csv files have been downloaded manually and placed in the same folder as the script.
     .EXAMPLE
         ./GetVB365Data.ps1
     .EXAMPLE
@@ -29,45 +31,54 @@
 
 [CmdletBinding()]
 Param(
-    [Parameter(Mandatory=$False)]
-    [string]$Days=30
+    [Parameter(Mandatory = $False)]
+    [string]$Days = 30,
+    [Parameter(Mandatory = $False)]
+    [bool]$Local = $False
 )
 
-$options = @(7,30,90,180)
+$options = @(7, 30, 90, 180)
+
 
 if ($Days -notin $options) {
     Write-Host "Please choose either 7, 30, 90, or 180"
     return
 }
 
-Connect-MgGraph -Scopes "user.read.all", "reports.read.all"
+if ($Local -eq $False) {
+    Connect-MgGraph -Scopes "user.read.all", "reports.read.all"
 
-# GetOffice365ActiveUserDetail
-Invoke-MgGraphRequest -Uri  "https://graph.microsoft.com/v1.0/reports/getOffice365ActiveUserDetail(period='D$Days')" -OutputFilePath active_user_detail.csv
+    # GetOffice365ActiveUserDetail
+    Get-MgReportOffice365ActiveUserDetail -Period D$Days -OutFile active_user_detail.csv
 
-# GetOffice365ActiveUserCounts
-Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/reports/getOffice365ActiveUserCounts(period='D$Days')" -OutputFilePath active_user_counts.csv
+    # GetOffice365ActiveUserCounts
+    Get-MgReportOffice365ActiveUserCount -Period D$Days -OutFile active_user_counts.csv
 
-# GetOffice365GroupsActivityGroupCounts
-Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/reports/getOffice365GroupsActivityGroupCounts(period='D$Days')" -OutputFilePath group_activity_counts.csv
+    # GetOffice365GroupsActivityGroupCounts
+    Get-MgReportOffice365GroupActivityCount -Period D$Days -OutFile group_activity_counts.csv
 
-# GetMailboxUsageDetail
-Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/reports/getMailboxUsageDetail(period='D$Days')" -OutputFilePath mailbox_usage_detail.csv
+    # GetMailboxUsageDetail
+    Get-MgReportMailboxUsageDetail -Period D$Days -OutFile mailbox_usage_detail.csv 
+    
+    # GetMailboxUsageStorage
+    Get-MgReportMailboxUsageStorage -Period D$Days -OutFile mailbox_usage_storage.csv
 
-# GetMailboxUsageStorage
-Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/reports/getMailboxUsageStorage(period='D$Days')" -OutputFilePath mailbox_useage_storage.csv
+    # GetOneDriveUsageStorage
+    Get-MgReportOneDriveUsageStorage -Period D$Days -OutFile onedrive_usage_storage.csv
 
-# GetOneDriveUsageStorage
-Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/reports/getOneDriveUsageStorage(period='D$Days')" -OutputFilePath onedrive_usage_storage.csv
+    # GetSharePointSiteUsageStorage
+    Get-MgReportSharePointSiteUsageStorage -Period D$Days -OutFile sharepoint_site_storage.csv
 
-# GetSharePointSiteUsageStorage
-Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/reports/getSharePointSiteUsageStorage(period='D$Days')" -OutputFilePath sharepoint_site_storage.csv
+    # GetSharePointSiteUseageSiteCounts
+    Get-MgReportSharePointSiteUsageSiteCount -Period D$Days -OutFile sharepoint_site_counts.csv
 
-# GetSharePointSiteUseageSiteCountds
-Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/reports/getSharePointSiteUsageSiteCounts(period='D$Days')" -OutputFilePath sharepoint_site_counts.csv
-
-# GetSharePointSitesDetail
-Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/reports/getSharePointSiteUsageDetail(period='D$Days')" -OutputFilePath sharepoint_sites_detail.csv
+    # GetSharePointSitesDetail
+    Get-MgReportSharePointSiteUsageDetail -Period D$Days -OutFile sharepoint_sites_detail.csv
+    
+}
+else {
+    Write-Host "Running in Local mode"
+}
 
 function Get-Change {
     param (
@@ -77,7 +88,7 @@ function Get-Change {
     )
     [float]$diff = $newest - $oldest
     [float]$change = ((($diff / $oldest) * 100) / $Days) * 7
-    if($change -lt 0.01) {
+    if ($change -lt 0.01) {
         $change = 0.01
     }
     $change
@@ -85,12 +96,13 @@ function Get-Change {
 
 function Test-Size {
     param (
-        [int]$Cap  
+        [float]$Cap  
     )
 
-    if($Cap -le 0) {
-        return 1
-    } else {
+    if ($Cap -le 0.01) {
+        return 0.01
+    }
+    else {
         return $Cap
     }
 }
@@ -102,9 +114,25 @@ class RetentionSize {
     RetentionSize(
         [int]$v,
         [string]$u
-    ){
+    ) {
         $this.value = $v
         $this.unit = $u
+    }
+}
+
+function Get-Value {
+    param(
+        [array]$data,
+        [bool]$old
+    )
+
+    if ($old) {
+        [decimal]$oldestStorage = ($data | Select-Object -Last 1).'Storage Used (Byte)'
+        return $oldestStorage
+    }
+    else {
+        [decimal]$newestStorage = ($data | Select-Object -First 1).'Storage Used (Byte)'
+        return $newestStorage
     }
 }
 
@@ -141,7 +169,7 @@ class TableState {
         [TableItem]$am,
         [TableItem]$sp,
         [TableItem]$od
-    ){
+    ) {
         $this.primaryMailbox = $pm
         $this.archiveMailbox = $am
         $this.sharepoint = $sp
@@ -166,7 +194,7 @@ class CostState {
         [int]$bs,
         [int]$ps,
         [string]$of
-    ){
+    ) {
         $this.regionName = $rg
         $this.performanceTier = $pt
         $this.capacityTier = $ct
@@ -196,11 +224,19 @@ class SaveData {
     }
 }
 
+
 # VB365 active user counts
 
-$userCounts = Import-Csv -Path ./active_user_counts.csv 
-$userDetail = Import-Csv -Path ./active_user_detail.csv
-$sharePointSites = Import-Csv -Path ./sharepoint_site_counts.csv
+Try {
+    $userCounts = Import-Csv -Path ./active_user_counts.csv 
+    $userDetail = Import-Csv -Path ./active_user_detail.csv
+    $sharePointSites = Import-Csv -Path ./sharepoint_site_counts.csv
+} 
+Catch {
+    Write-Host "One or more user counts files CSV files are missing."
+    Write-Host "active_user_counts, active_user_detail and sharepoint_site_counts files required"
+    Exit
+}
 
 # removes user information from the active_user_detail.csv file
 $userDetail | Select-Object 'Has Exchange License', 'Has OneDrive License', 'Has SharePoint License', 'Has Teams License' | Export-Csv -Path .\active_user_detail.csv -NoTypeInformation
@@ -218,39 +254,47 @@ foreach ($item in $userCounts) {
 }
 
 # licensed users
-$exchangeAll = ($userDetail | Where-Object {$_.'Has Exchange License' -eq 'True'} ).count
-$onedriveAll = ($userDetail | Where-Object {$_.'Has OneDrive License' -eq 'True'} ).count
-$teamsAll = ($userDetail | Where-Object {$_.'Has Teams License' -eq 'True'} ).count
+$exchangeAll = ($userDetail | Where-Object { $_.'Has Exchange License' -eq 'True' } ).count
+$onedriveAll = ($userDetail | Where-Object { $_.'Has OneDrive License' -eq 'True' } ).count
+$teamsAll = ($userDetail | Where-Object { $_.'Has Teams License' -eq 'True' } ).count
 
-$sharepointSites = ($sharePointSites | Where-Object {$_.'Site Type' -like 'ALL'} | ForEach-Object {[int]$_.Total }  | Measure-Object -Maximum).Maximum
+$sharepointSites = ($sharePointSites | Where-Object { $_.'Site Type' -like 'All' } | Select-Object -First 1).Total 
 
-# get capacity info for each
-$mailboxStorage = Import-Csv -Path ./mailbox_useage_storage.csv
-$sharepointStorage = Import-Csv -Path ./sharepoint_site_storage.csv
-$onedriveStorage = Import-Csv -Path ./onedrive_usage_storage.csv
+try {
+    # get capacity info for each
+    $mailboxStorage = Import-Csv -Path ./mailbox_usage_storage.csv
+    $sharepointStorage = Import-Csv -Path ./sharepoint_site_storage.csv
+    $onedriveStorage = Import-Csv -Path ./onedrive_usage_storage.csv
+}
+catch {
+    Write-Host "One or more storage CSV files are missing"
+    Write-Host "mailbox_usage_storage, sharepoint_site_storage and onedrive_usage_storage files required"
+    Exit
+}
+
 
 # Filter out any zero values, removes possible error if report length does not meet the period
-$mailboxStorage = $mailboxStorage | Where-Object {$_.'Storage Used (Byte)' -gt 0}
-$sharepointStorage = $sharepointStorage | Where-Object {$_.'Storage Used (Byte)' -gt 0}
-$onedriveStorage = $onedriveStorage | Where-Object {$_.'Storage Used (Byte)' -gt 0}
+$mailboxStorage = $mailboxStorage | Where-Object { $_.'Storage Used (Byte)' -gt 0 }
+$sharepointStorage = $sharepointStorage | Where-Object { $_.'Storage Used (Byte)' -gt 0 }
+$onedriveStorage = $onedriveStorage | Where-Object { $_.'Storage Used (Byte)' -gt 0 }
 
 # exchange
-[decimal]$oldestMailbox = $mailboxStorage | Select-Object -Last 1 | ForEach-Object {$_.'Storage Used (Byte)'}
-[decimal]$newestMailbox = $mailboxStorage | Select-Object -First 1 | ForEach-Object {$_.'Storage Used (Byte)'}
+[decimal]$oldestMailbox = Get-Value -data $mailboxStorage -old $true
+[decimal]$newestMailbox = Get-Value -data $mailboxStorage -old $false
 $mailBoxChange = Get-Change -Oldest $oldestMailbox -Newest $newestMailbox -Days $Days
 $newestMailboxTb = $newestMailbox / [Math]::Pow(1024, 4)
 $newestMailboxTb = Test-Size $newestMailboxTb
 
 #sharepoint
-[decimal]$oldestSharepoint = $sharepointStorage | Select-Object -Last 1 | ForEach-Object {$_.'Storage Used (Byte)'}
-[decimal]$newestSharepoint = $sharepointStorage | Select-Object -First 1 | ForEach-Object {$_.'Storage Used (Byte)'}
+[decimal]$oldestSharepoint = Get-Value -data $sharepointStorage -old $true
+[decimal]$newestSharepoint = Get-Value -data $sharepointStorage -old $false
 $sharepointChange = Get-Change -Oldest $oldestSharepoint -Newest $newestSharepoint -Days $Days
-$newestSharepointTb = $oldestSharepoint / [Math]::Pow(1024, 4)
+$newestSharepointTb = $newestSharepoint / [Math]::Pow(1024, 4)
 $newestSharepointTb = Test-Size $newestSharepointTb
 
 #onedrive
-[decimal]$oldestOnedrive = $onedriveStorage | Select-Object -Last 1 | ForEach-Object {$_.'Storage Used (Byte)'}
-[decimal]$newestOnedrive = $onedriveStorage | Select-Object -First 1 | ForEach-Object {$_.'Storage Used (Byte)'}
+[decimal]$oldestOnedrive = Get-Value -data $onedriveStorage -old $true
+[decimal]$newestOnedrive = Get-Value -data $onedriveStorage -old $false
 $onedriveChange = Get-Change -Oldest $oldestOnedrive -Newest $newestOnedrive -Days $Days
 $newestOnedriveTb = $newestOnedrive / [Math]::Pow(1024, 4)
 $newestOnedriveTb = Test-Size $newestOnedriveTb
@@ -264,8 +308,8 @@ $retentionSize = [RetentionSize]::new(
 # create the main object
 $primaryMailbox = [TableItem]::new(
     "primaryMailbox",
-    [math]::Round($newestMailboxTb,2),
-    [math]::Round($mailBoxChange,2),
+    [math]::Round($newestMailboxTb, 2),
+    [math]::Round($mailBoxChange, 2),
     $exchangeAll,
     $retentionSize
 )
@@ -290,7 +334,7 @@ $sharepoint = [TableItem]::new(
 
 $onedrive = [TableItem]::new(
     "onedrive",
-    [math]::Round($newestOnedriveTb,2),
+    [math]::Round($newestOnedriveTb, 2),
     [math]::Round($onedriveChange, 2),
     $onedriveAll,
     $retentionSize

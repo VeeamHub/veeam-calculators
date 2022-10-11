@@ -1,20 +1,12 @@
 # Veeam Calculators Repository
 
-This repository hosts specific information and scripts associated with the https://calculator.veeam.com/ site. 
+This repository hosts specific information and scripts associated with the https://calculator.veeam.com/ site.
 
 VB365 Calculator Scripts - Gather VB365 data for use in the https://calculator.veeam.com/vb365
 
 ## 🤝🏾 License
 
-* [MIT License](LICENSE)
-
-## ✍ Contributions
-
-We welcome contributions from the community! We encourage you to create [issues](https://github.com/VeeamHub/veeam-calculators/issues/new/choose) for Bugs & Feature Requests and submit Pull Requests. For more detailed information, refer to our [Contributing Guide](CONTRIBUTING.md).
-
-## 🤝🏾 License
-
-* [MIT License](LICENSE)
+- [MIT License](LICENSE)
 
 ## 🤔 Questions
 
