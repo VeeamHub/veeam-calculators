@@ -46,35 +46,49 @@ if ($Days -notin $options) {
 }
 
 if ($Local -eq $False) {
-    Connect-MgGraph -Scopes "user.read.all", "reports.read.all"
 
-    # GetOffice365ActiveUserDetail
-    Get-MgReportOffice365ActiveUserDetail -Period D$Days -OutFile active_user_detail.csv
+    # Add check for modules loaded
+    if (!(Get-Module -Name Microsoft.Graph*)) { # if no modules found with this name.
+        Write-Host "Microsoft.Graph module does not appear to be loaded."
+        Write-Host "Refer to README @ https://github.com/VeeamHub/veeam-calculators/tree/master/Get-VB365Data for guidance on installing/loading these modules."
+        Exit
+    }
 
-    # GetOffice365ActiveUserCounts
-    Get-MgReportOffice365ActiveUserCount -Period D$Days -OutFile active_user_counts.csv
+    try {
+        Connect-MgGraph -Scopes "user.read.all", "reports.read.all"
 
-    # GetOffice365GroupsActivityGroupCounts
-    Get-MgReportOffice365GroupActivityCount -Period D$Days -OutFile group_activity_counts.csv
+        # GetOffice365ActiveUserDetail
+        Get-MgReportOffice365ActiveUserDetail -Period D$Days -OutFile active_user_detail.csv
 
-    # GetMailboxUsageDetail
-    Get-MgReportMailboxUsageDetail -Period D$Days -OutFile mailbox_usage_detail.csv 
-    
-    # GetMailboxUsageStorage
-    Get-MgReportMailboxUsageStorage -Period D$Days -OutFile mailbox_usage_storage.csv
+        # GetOffice365ActiveUserCounts
+        Get-MgReportOffice365ActiveUserCount -Period D$Days -OutFile active_user_counts.csv
 
-    # GetOneDriveUsageStorage
-    Get-MgReportOneDriveUsageStorage -Period D$Days -OutFile onedrive_usage_storage.csv
+        # GetOffice365GroupsActivityGroupCounts
+        Get-MgReportOffice365GroupActivityCount -Period D$Days -OutFile group_activity_counts.csv
 
-    # GetSharePointSiteUsageStorage
-    Get-MgReportSharePointSiteUsageStorage -Period D$Days -OutFile sharepoint_site_storage.csv
+        # GetMailboxUsageDetail
+        Get-MgReportMailboxUsageDetail -Period D$Days -OutFile mailbox_usage_detail.csv 
+        
+        # GetMailboxUsageStorage
+        Get-MgReportMailboxUsageStorage -Period D$Days -OutFile mailbox_usage_storage.csv
 
-    # GetSharePointSiteUseageSiteCounts
-    Get-MgReportSharePointSiteUsageSiteCount -Period D$Days -OutFile sharepoint_site_counts.csv
+        # GetOneDriveUsageStorage
+        Get-MgReportOneDriveUsageStorage -Period D$Days -OutFile onedrive_usage_storage.csv
 
-    # GetSharePointSitesDetail
-    Get-MgReportSharePointSiteUsageDetail -Period D$Days -OutFile sharepoint_sites_detail.csv
-    
+        # GetSharePointSiteUsageStorage
+        Get-MgReportSharePointSiteUsageStorage -Period D$Days -OutFile sharepoint_site_storage.csv
+
+        # GetSharePointSiteUseageSiteCounts
+        Get-MgReportSharePointSiteUsageSiteCount -Period D$Days -OutFile sharepoint_site_counts.csv
+
+        # GetSharePointSitesDetail
+        Get-MgReportSharePointSiteUsageDetail -Period D$Days -OutFile sharepoint_sites_detail.csv
+    } catch {
+        Write-Host "There was an issue executing Microsoft.Graph cmdlets."
+        Write-Host "Check to ensure the modules are loaded, you are authenticated, and you have the required Graph permissions."
+        Write-Host "Refer to README @ https://github.com/VeeamHub/veeam-calculators/tree/master/Get-VB365Data for details."
+        Exit
+    }
 }
 else {
     Write-Host "Running in Local mode"
