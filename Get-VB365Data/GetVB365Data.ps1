@@ -27,6 +27,7 @@
     Author:         Ed Howard (edward.x.howard@veeam.com)
     Creation Date:  06.06.2022
     Purpose/Change: 06.06.2022 - 1.0 - Initial script development
+    Purpose/Change: 20.11.2022 - 1.1 - Update of output file
 #>
 
 [CmdletBinding()]
