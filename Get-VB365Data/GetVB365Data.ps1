@@ -352,7 +352,7 @@ $tableState = [TableState]::new(
 )
 
 # legacy
-$manualCostingState = [CostState]::new(
+$manualCostingState = [ManualCostState]::new(
     0.005,
     0.004,
     0.005,
