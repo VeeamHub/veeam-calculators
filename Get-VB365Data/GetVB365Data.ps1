@@ -23,11 +23,13 @@
     .OUTPUTS
         vb365-environment-info.json
     .Notes 
-    Version:        1.0
+    Version:        1.2
     Author:         Ed Howard (edward.x.howard@veeam.com)
     Creation Date:  06.06.2022
     Purpose/Change: 06.06.2022 - 1.0 - Initial script development
     Purpose/Change: 20.11.2022 - 1.1 - Update of output file
+    Contributor:    David Tosoff (https://github.com/drtcode)
+    Purpose/Change: 12.14.2022 - 1.2 - Added check for loaded Graph modules, and Try-Catch block for associated cmdlets.
 #>
 
 [CmdletBinding()]
