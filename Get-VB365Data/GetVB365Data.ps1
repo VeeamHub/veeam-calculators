@@ -27,6 +27,7 @@
     Author:         Ed Howard (edward.x.howard@veeam.com)
     Creation Date:  06.06.2022
     Purpose/Change: 06.06.2022 - 1.0 - Initial script development
+    Purpose/Change: 20.11.2022 - 1.1 - Update of output file
 #>
 
 [CmdletBinding()]
@@ -191,31 +192,34 @@ class TableState {
     }
 }
 
-class CostState {
-    [string]$regionName
-    [string]$performanceTier
-    [string]$capacityTier
-    [string]$replication
-    [int]$backupServerConfig
-    [int]$proxyServerConfig
-    [string]$offer
+class ManualCostState {
+    [float]$writeOperation
+    [float]$readOperation
+    [float]$listOperation
+    [float]$otherOperation
+    [float]$meterCostValue
+    [float]$proxy
+    [float]$backup
+    [int]$multiplier
 
-    CostState(
-        [string]$rg,
-        [string]$pt,
-        [string]$ct,
-        [string]$re,
-        [int]$bs,
-        [int]$ps,
-        [string]$of
+    ManualCostState(
+        [float]$wo,
+        [float]$ro,
+        [float]$lo,
+        [float]$oo,
+        [float]$mcv,
+        [float]$pv,
+        [float]$bv,
+        [int]$mult
     ) {
-        $this.regionName = $rg
-        $this.performanceTier = $pt
-        $this.capacityTier = $ct
-        $this.replication = $re
-        $this.backupServerConfig = $bs
-        $this.proxyServerConfig = $ps
-        $this.offer = $of
+        $this.writeOperation = $wo
+        $this.readOperation = $ro
+        $this.listOperation = $lo
+        $this.otherOperation = $oo
+        $this.meterCostValue = $mcv
+        $this.proxy = $pv
+        $this.backup = $bv
+        $this.multiplier = $mult
     }
 }
 
@@ -223,18 +227,18 @@ class SaveData {
     [TableState]$tableState
     [int]$teamsState
     [bool]$recommended
-    [CostState]$costingState
+    [ManualCostState]$manualCostingState
 
     SaveData(
         [TableState]$ts,
         [int]$tes,
         [bool]$re,
-        [CostState]$cs
+        [ManualCostState]$cs
     ) {
         $this.tableState = $ts
         $this.teamsState = $tes
         $this.recommended = $re
-        $this.costingState = $cs
+        $this.manualCostingState = $cs
     }
 }
 
@@ -362,21 +366,22 @@ $tableState = [TableState]::new(
 )
 
 # legacy
-$costState = [CostState]::new(
-    "US Central",
-    "Tiered Block Blob",
-    "Hot",
-    "LRS Data Stored",
-    0,
-    0,
-    "0003P"
+$manualCostingState = [ManualCostState]::new(
+    0.005,
+    0.004,
+    0.005,
+    0.0004,
+    0.02,
+    0.75,
+    0.2,
+    1
 )
 
 $saveData = [SaveData]::new(
     $tableState,
     $teamsAll,
     $true,
-    $costState
+    $manualCostingState
 )
 
 $saveData | ConvertTo-Json -Depth 9 | Out-File -FilePath vb365-environment-info.json
